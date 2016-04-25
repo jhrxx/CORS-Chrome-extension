@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+
+  "name": "CORS",
+  "description": "This extension shows a Google Image search result for the current page",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "off.png",
+    "default_popup": "popup.html",
+    "default_title": "Click Me!"
+  },
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": false,
+    "open_in_tab": true
+  },
+
+  "permissions": [
+    "background",
+    "storage",
+    "webRequest",
+    "activeTab"
+  ]
+}

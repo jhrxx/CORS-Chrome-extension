@@ -1,0 +1,9 @@
+{
+  "name": "chrome-cors",
+  "version": "1.0.0",
+  "dependencies": {
+    "zepto": "^1.1.6",
+    "weui": "^0.4.1",
+    "chrome-bootstrap": "^1.5.0"
+  }
+}
