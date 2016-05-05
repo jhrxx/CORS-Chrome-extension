@@ -9,63 +9,50 @@
 </head>
 
 <body>
+  <script id="filter_list_template" type="text/html">
+    {{each urls}}
+    <label class="weui_cell weui_check_label" for="fu_{{$value.id}}">
+      <div class="weui_cell_hd">
+        <input type="checkbox" class="weui_check" name="checkbox" id="fu_{{$value.id}}" {{if $value.active}} checked{{/if}}>
+        <i class="weui_icon_checked"></i>
+      </div>
+      <div class="weui_cell_bd weui_cell_primary">
+        <p>{{$value.url}}</p>
+      </div>
+      <div class="weui_cell_ft">{{$value.description}}</div>
+    </label>
+    {{/each}}
+  </script>
+
   <div id="container" class="container">
     <div class="cell">
-      <div class="weui_cells_title">开关</div>
+      <div class="weui_cells_title">启用跨站 HTTP 请求</div>
       <div class="weui_cells weui_cells_form">
         <div class="weui_cell weui_cell_switch">
-          <div class="weui_cell_hd weui_cell_primary">启用跨站 HTTP 请求 跨源资源共享</div>
+          <div class="weui_cell_hd weui_cell_primary">跨源资源共享</div>
           <div class="weui_cell_ft">
             <input class="weui_switch" type="checkbox" id="switch">
           </div>
         </div>
       </div>
-      <div class="weui_cells_title">新增过滤逻辑</div>
-      <!-- <div class="weui_cells weui_cells_form">
-        <div class="weui_cell">
-          <div class="weui_cell_hd">
-            <label class="weui_label">qq</label>
-          </div>
+      <div class="weui_cells_title">启用过滤逻辑</div>
+      <div class="weui_cells weui_cells_checkbox weui_cells_access">
+        <div id="filter_list"></div>
+        <a class="weui_cell" id="options">
           <div class="weui_cell_bd weui_cell_primary">
-            <input class="weui_input" type="number" pattern="[0-9]*" placeholder="请输入qq号" />
-          </div>
-        </div>
-        <div class="weui_cell weui_vcode">
-          <div class="weui_cell_hd">
-            <label class="weui_label">验证码</label>
-          </div>
-          <div class="weui_cell_bd weui_cell_primary">
-            <input class="weui_input" type="number" placeholder="请输入验证码" />
+            <p>自定义</p>
           </div>
           <div class="weui_cell_ft">
-            <img src="./images/vcode.jpg" />
           </div>
-        </div>
-        <div class="weui_cell">
-          <div class="weui_cell_hd">
-            <label class="weui_label">银行卡</label>
-          </div>
-          <div class="weui_cell_bd weui_cell_primary">
-            <input class="weui_input" type="number" pattern="[0-9]*" placeholder="请输入银行卡号" />
-          </div>
-        </div>
-        <div class="weui_cell weui_vcode weui_cell_warn">
-          <div class="weui_cell_hd">
-            <label class="weui_label">验证码</label>
-          </div>
-          <div class="weui_cell_bd weui_cell_primary">
-            <input class="weui_input" type="number" placeholder="请输入验证码" />
-          </div>
-          <div class="weui_cell_ft">
-            <i class="weui_icon_warn"></i>
-            <img src="./images/vcode.jpg" />
-          </div>
-        </div>
-      </div> -->
+        </a>
+      </div>
     </div>
   </div>
+
   <script src="/bower_components/zepto/zepto.min.js"></script>
+  <script src="/bower_components/art-template/dist/template.js"></script>
   <script src="popup.js"></script>
 </body>
 
 </html>
+<!-- "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self' blob: filesystem: chrome-extension-resource:".↵" -->

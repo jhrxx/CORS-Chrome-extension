@@ -4,11 +4,19 @@
   "name": "CORS",
   "description": "This extension shows a Google Image search result for the current page",
   "version": "1.0",
+  "homepage_url": "https://github.com/jhrxx/CORS-Chrome-extension",
+  "default_locale": "zh_CN",
 
   "browser_action": {
     "default_icon": "off.png",
     "default_popup": "popup.html",
     "default_title": "Click Me!"
+  },
+
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
   },
 
   "background": {
@@ -21,10 +29,13 @@
     "open_in_tab": true
   },
 
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+
   "permissions": [
-    "background",
+    "tabs",
     "storage",
     "webRequest",
-    "activeTab"
+    "<all_urls>",
+    "webRequestBlocking"
   ]
 }

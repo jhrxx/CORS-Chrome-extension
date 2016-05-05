@@ -36,10 +36,6 @@ body {
   -webkit-margin-start: 170px
 }
 
-input[type='text'] {
-  width: 350px;
-}
-
 #success_message {
   margin-top: 10px;
   padding: 5px 10px;
@@ -53,4 +49,36 @@ input[type='text'] {
 
 .social-buttons {
   margin-left: 23px;
+}
+
+
+.chrome-bootstrap a {
+  text-decoration: none;
+}
+.chrome-bootstrap a:hover {
+  text-decoration: underline;
+}
+
+#response_headers input[type="text"] {
+  width: 200px;
+}
+
+#dialog input[type="text"] {
+  width: 270px;
+}
+
+.overlay.transparent {
+  /*display: none;*/
+  z-index: -1;
+}
+#filter_list input + a {
+  margin-left: 10px;
+}
+#filter_list a {
+  /*display: none;*/
+}
+
+#filter_list .row:hover a {
+  /*display: inline;*/
+  cursor: pointer;
 }

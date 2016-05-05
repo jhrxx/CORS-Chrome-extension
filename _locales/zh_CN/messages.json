@@ -1,0 +1,19 @@
+{
+	"on": {
+		"message": "开启"
+	},
+	"extName": {
+		"message": "跨源资源共享",
+		"description": "为测试提供的"
+	},
+	"error": {
+	  "message": "Error: $details$",
+	  "description": "Generic error template. Expects error parameter to be passed in.",
+	  "placeholders": {
+	    "details": {
+	      "content": "$1",
+	      "example": "Failed to fetch RSS feed."
+	    }
+	  }
+	}
+}

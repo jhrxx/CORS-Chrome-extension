@@ -7,24 +7,40 @@
 }
 
 body,html {
-  /*height: 100%;*/
   -webkit-tap-highlight-color: transparent
 }
 
 body {
   overflow-x: hidden;
+  -webkit-user-select: none;
   background-color: #fbf9fe
 }
 
 .container {
-  height: 100%;
-  overflow-y: auto;
+  /*height: 100%;*/
+  /*overflow-y: auto;*/
   -webkit-overflow-scrolling: touch
 }
 
 .container>div {
   background-color: #fbf9fe
 }
+
+
+label.weui_check_label:hover,
+.weui_switch:hover {
+  cursor: pointer;
+}
+
+.weui_cell_ft {
+  /*max-width: 100px;*/
+}
+
+#filter_list .weui_cell_ft:after {
+  content: none;
+}
+
+
 
 .hd {
   padding: 2em 0

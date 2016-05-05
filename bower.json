@@ -4,6 +4,7 @@
   "dependencies": {
     "zepto": "^1.1.6",
     "weui": "^0.4.1",
-    "chrome-bootstrap": "^1.5.0"
+    "chrome-bootstrap": "^1.5.0",
+    "art-template": "^3.0.1"
   }
 }

@@ -9,12 +9,86 @@
 </head>
 
 <body class="chrome-bootstrap">
+  <script id="filter_list_template" type="text/html">
+    {{each urls}}
+    <div class="row">
+      <input type="checkbox" id="url_{{$value.id}}"{{if $value.active}} checked{{/if}}>
+      {{$value.url}}
+      {{if $value.id !== 0 }}
+      <a class="del" data-id="{{$value.id}}">删除</a>
+      {{/if}}
+      <a class="edit" data-id="{{$value.id}}" data-pattern="{{$value.url}}" data-description="{{$value.description}}" data-active="{{$value.active?1:0}}">编辑</a>
+      {{if $value.description}}
+      <p class="desc">{{$value.description}}</p>
+      {{/if}}
+    </div>
+    {{/each}}
+  </script>
+
+  <script id="add_edit_template" type="text/html">
+    <a href="#" class="close-button"></a>
+    <h1>{{title}}</h1>
+    <section class="content-area">
+      <div class="row">
+       patterns: <input id="url_pattern" type="text" placeholder="Intercepted URLs or URL patterns"
+       {{if type === 'edit'}} value="{{pattern}}"{{/if}}>
+      </div>
+      <div class="row">
+        <a target="_blank" href="https://developer.chrome.com/extensions/match_patterns">了解详情</a>
+        &nbsp;
+        <a target="_blank" href="https://www.google.com/support/enterprise/static/gsa/docs/admin/74/gsa_doc_set/admin_crawl/url_patterns.html#1076127">验证</a>
+      </div>
+      <div class="row">
+        description: <input type="text" id="url_description" placeholder="option"{{if type === 'edit'}} value="{{description}}"{{/if}}>
+      </div>
+      <label for="url_active">
+        <input id="url_active" type="checkbox"{{if type === 'edit' && active}} checked{{/if}}>
+        启用
+      </label>
+    </section>
+    <div class="action-area">
+      <div class="button-strip">
+        <button class="save-{{type}}"{{if type === 'edit'}} data-id="{{id}}"{{/if}}>确定</button>
+        <button class="cancel">取消</button>
+      </div>
+    </div>
+  </script>
+
+  <script id="delete_template" type="text/html">
+    <h1>你确定要删除么？</h1>
+    <div class="action-area">
+    <div class="button-strip">
+      <button class="confirm-delete" data-id="{{id}}">确定</button>
+      <button class="cancel">取消</button>
+    </div>
+  </script>
+
+  <script id="response_headers_template" type="text/html">
+    <section>
+    {{each headers}}
+      <h3>{{$value.title}}:</h3>
+      <div class="row">
+        <input type="checkbox" id="enable_access_control_{{$value.id}}"{{if $value.active}} checked{{/if}}>
+        <label for="enable_access_control_{{$value.id}}">enable</label>
+        <label for="access_control_{{$value.id}}">
+          <input type="text" placeholder="{{$value.placeholder}}" id="access_control_{{$value.id}}" value="{{$value.value}}" {{if !$value.active}} disabled{{/if}}>
+          (press enter to save)
+        </label>
+        <p class="desc">{{$value.description}}</p>
+      </div>
+    {{/each}}
+    </section>
+  </script>
+
   <div class="frame">
     <div class="navigation">
-      <h1><a href="https://github.com/octo-linker/chrome-extension">Octo-Linker</a></h1>
+      <h1><a href="https://github.com/jhrxx/CORS-Chrome-extension" target="_blank">CORS-Settings</a></h1>
       <ul class="menu">
         <li class="selected">
-          <a href="#settings">Settings</a>
+          <a href="#response_headers">HTTP响应头</a>
+        </li>
+        <li>
+          <a href="#settings">URLs</a>
         </li>
       </ul>
       <ul class="menu">
@@ -27,19 +101,23 @@
       </div> -->
     </div>
     <div class="mainview view">
-      <div id="settings" class="selected">
+      <div id="response_headers" class="selected">
         <header>
-          <h1>Settings</h1>
+          <h1>The HTTP response headers</h1>
+        </header>
+        <div class="content"></div>
+      </div>
+      <div id="settings">
+        <header>
+          <h1>URLs</h1>
         </header>
         <div class="content">
-          <section>
-            <h3>Notifications</h3>
-            <input type="checkbox" id="enable_update_notification">
-            <label for="enable_update_notification">Show update notification after an extension update</label>
-            <p class="desc">Adds a notification bar on the top of GitHub.com if the extension was updated.</p>
-          </section>
-          <section id="languages-section">
-
+          <div class="controls">
+            <button id="add_url">新增过滤规则</button>
+            <div class="text"></div>
+          </div>
+          <h3>Filter Urls</h3>
+          <section id="filter_list">
           </section>
         </div>
       </div>
@@ -52,7 +130,7 @@
             <div id="product-description">
               <h2>CORS-Chrome-extension</h2>
               <span id="version-container"></span>
-              <a href="https://github.com/octo-linker/chrome-extension">Project on GitHub</a>
+              <a href="https://github.com/jhrxx/CORS-Chrome-extension" target="_blank">Project on GitHub</a>
             </div>
           </div>
           <div id="copyright-container">
@@ -62,7 +140,14 @@
       </div>
     </div>
   </div>
+
+  <div id="dialog" class="overlay transparent">
+    <div class="page">
+
+    </div>
+  </div>
   <script src="/bower_components/zepto/zepto.js"></script>
+  <script src="/bower_components/art-template/dist/template.js"></script>
   <script src="./options.js"></script>
 </body>
 
