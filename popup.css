@@ -3,7 +3,7 @@
   background-color: #fbf9fe;
 }*/
 #container {
-	width: 300px;
+	width: 350px;
 }
 
 body,html {
@@ -17,8 +17,6 @@ body {
 }
 
 .container {
-  /*height: 100%;*/
-  /*overflow-y: auto;*/
   -webkit-overflow-scrolling: touch
 }
 

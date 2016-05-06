@@ -1,26 +1,4 @@
-/*On install*/
-chrome.runtime.onInstalled.addListener(function() {
-  chrome.storage.local.set({
-    "active": false,
-    "urls": [{
-      "id": 0,
-      "active": true,
-      "url": "<all_urls>",
-      "description": "匹配所有链接",
-      "last_modify": getTimestamp()
-    }],
-    "headers": {
-      allow_origin: {active:true,value:'*'},
-      allow_headers: {active:false,value:''},
-      expose_headers: {active:false,value:''},
-      allow_credentials: {active:false,value:''},
-      max_age: {active:false,value:''},
-      allow_methods: {active:true,value:"GET, PUT, POST"}
-    }
-  });
-});
-
-var getTimestamp = function(){
+var getTimestamp = function() {
   return new Date().getTime();
 };
 
@@ -29,16 +7,13 @@ function getConfig(keys, callback) {
 }
 
 function setConfig(value, callback) {
-  if(typeof callback !== 'function') {
-    callback = function(){};
+  if (typeof callback !== 'function') {
+    callback = function() {};
   }
 
   // Save it using the Chrome extension storage API.
   chrome.storage.local.set(value, function() {
-    // Notify that we saved.
-    console.log('Settings saved');
-
-    if('active' in value) {
+    if ('active' in value) {
       var _icon = value.active ? 'on' : 'off';
       chrome.browserAction.setIcon({ path: _icon + ".png" });
     }
@@ -49,10 +24,10 @@ function setConfig(value, callback) {
   });
 }
 
-function headersReceivedListener (details) {
-  for(item in headersCfg) {
-    if(headersCfg[item].active) {
-      details.responseHeaders.push({name: headers[item], value: headersCfg[item].value});
+function headersReceivedListener(details) {
+  for (item in headersCfg) {
+    if (headersCfg[item].active) {
+      details.responseHeaders.push({ name: headers[item], value: headersCfg[item].value });
     }
   }
 
@@ -78,7 +53,7 @@ function reloadSettings() {
     var _urls = [];
 
     for (var i = data.urls.length - 1; i >= 0; i--) {
-      if(data.urls[i].active) {
+      if (data.urls[i].active) {
         _urls.push(data.urls[i].url);
       }
     };
@@ -96,12 +71,42 @@ function reloadSettings() {
      */
     chrome.webRequest.onHeadersReceived.removeListener(headersReceivedListener);
 
-    if(data.active) {
-      console.log('urls', _urls);
+    if (data.active) {
       chrome.webRequest.onHeadersReceived.addListener(headersReceivedListener, {
         urls: _urls
-      },["blocking", "responseHeaders"]);
+      }, ["blocking", "responseHeaders"]);
     }
   });
 };
 
+/*On Installed*/
+chrome.runtime.onInstalled.addListener(function() {
+  getConfig('active', function(data) {
+    // if is update save user config
+    if ($.isEmptyObject(data)) {
+      chrome.storage.local.set({
+        "active": false,
+        "urls": [{
+          "id": 0,
+          "active": true,
+          "url": "<all_urls>",
+          "description": "匹配所有链接",
+          "last_modify": getTimestamp()
+        }],
+        "headers": {
+          allow_origin: { active: true, value: '*' },
+          allow_headers: { active: false, value: '' },
+          expose_headers: { active: false, value: '' },
+          allow_credentials: { active: false, value: '' },
+          max_age: { active: false, value: '' },
+          allow_methods: { active: true, value: "GET, PUT, POST" }
+        }
+      });
+
+      reloadSettings();
+    }
+  })
+});
+
+//  add listener after enabled/installed
+reloadSettings();

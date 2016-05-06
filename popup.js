@@ -8,13 +8,17 @@ $(function() {
 
   // init switch and filter list
   bgp.getConfig(['active', 'urls'], function(data) {
-    // console.log('gets settings: ', data);
     // set active icon
     var _icon = data.active ? 'on' : 'off';
     chrome.browserAction.setIcon({ path: _icon + ".png" });
 
     // set switch status
     $switch.prop('checked', data.active);
+
+    // prevent list to lang to display scroll bar
+    if(data.urls.length > 8) {
+      data.urls.length = 8;
+    }
 
     html = template('filter_list_template', data);
 
@@ -32,12 +36,13 @@ $(function() {
       var _id = parseInt(_target.id.replace('fu_', ''));
       $.each(data.urls, function(i, v) {
         if (v.id === _id) {
-          console.log(v);
           v.active = _target.checked;
           return false;
         }
       });
       bgp.setConfig({ "urls": data.urls });
+      // TODO  refreash option page
+      sync();
     });
   });
 
@@ -57,4 +62,13 @@ $(function() {
     return false;
   });
 
+  // sync option page data
+  var sync = function() {
+    var optionsUrl = chrome.extension.getURL('options.html');
+    chrome.tabs.query({ url: optionsUrl }, function(tabs) {
+      if (tabs.length === 1) {
+        chrome.tabs.sendRequest(tabs[0].id, {onchange: "weui_check"});
+      }
+    });
+  };
 });

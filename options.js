@@ -1,42 +1,35 @@
 var bgp = chrome.extension.getBackgroundPage();
-var headers = [
-  {
-    id: 'allow_origin',
-    title: 'Access-Control-Allow-Origin',
-    placeholder: '<origin> | *',
-    description: 'origin参数指定一个允许向该服务器提交请求的 URI.对于一个不带有 credentials 的请求,可以指定为\'*\',表示允许来自所有域的请求.'
-  },
-  {
-    id: 'allow_headers',
-    title: 'Access-Control-Allow-Headers',
-    placeholder: '<field-name>[, <field-name>]*',
-    description: '在响应预检请求的时候使用.用来指明在实际的请求中,可以使用哪些自定义 HTTP 请求头'
-  },
-  {
-    id: 'expose_headers',
-    title: 'Access-Control-Expose-Headers',
-    placeholder: '',
-    description: '设置浏览器允许访问的服务器的头信息的白名单'
-  },
-  {
-    id: 'allow_credentials',
-    title: 'Access-Control-Allow-Credentials',
-    placeholder: 'true | false',
-    description: '告知客户端,当请求的 credientials 属性是  true 的时候,响应是否可以被得到.当它作为预请求的响应的一部分时,它用来告知实际的请求是否使用了 credentials. 注意,简单的GET请求不会预检,所以如果一个请求是为了得到一个带有 credentials的资源,而响应里又没有Access-Control-Allow-Credentials头信息,那么说明这个响应被忽略了.'
-  },
-  {
-    id: 'max_age',
-    title: 'Access-Control-Max-Age',
-    placeholder: '<delta-seconds>',
-    description: '这个头告诉我们这次预请求的结果的有效期是多久, delta-seconds 参数表示,允许这个预请求的参数缓存的秒数,在此期间,不用发出另一条预检请求. '
-  },
-  {
-    id: 'allow_methods',
-    title: 'Access-Control-Allow-Methods',
-    placeholder: '<method>[, <method>]*',
-    description: '指明资源可以被请求的方式有哪些(一个或者多个). 这个响应头信息在客户端发出预检请求的时候会被返回.'
-  }
-];
+var headers = [{
+  id: 'allow_origin',
+  title: 'Access-Control-Allow-Origin',
+  placeholder: '<origin> | *',
+  description: 'origin参数指定一个允许向该服务器提交请求的 URI.对于一个不带有 credentials 的请求,可以指定为\'*\',表示允许来自所有域的请求.'
+}, {
+  id: 'allow_headers',
+  title: 'Access-Control-Allow-Headers',
+  placeholder: '<field-name>[, <field-name>]*',
+  description: '在响应预检请求的时候使用.用来指明在实际的请求中,可以使用哪些自定义 HTTP 请求头'
+}, {
+  id: 'expose_headers',
+  title: 'Access-Control-Expose-Headers',
+  placeholder: '',
+  description: '设置浏览器允许访问的服务器的头信息的白名单'
+}, {
+  id: 'allow_credentials',
+  title: 'Access-Control-Allow-Credentials',
+  placeholder: 'true | false',
+  description: '告知客户端,当请求的 credientials 属性是  true 的时候,响应是否可以被得到.当它作为预请求的响应的一部分时,它用来告知实际的请求是否使用了 credentials. 注意,简单的GET请求不会预检,所以如果一个请求是为了得到一个带有 credentials的资源,而响应里又没有Access-Control-Allow-Credentials头信息,那么说明这个响应被忽略了.'
+}, {
+  id: 'max_age',
+  title: 'Access-Control-Max-Age',
+  placeholder: '<delta-seconds>',
+  description: '这个头告诉我们这次预请求的结果的有效期是多久, delta-seconds 参数表示,允许这个预请求的参数缓存的秒数,在此期间,不用发出另一条预检请求. '
+}, {
+  id: 'allow_methods',
+  title: 'Access-Control-Allow-Methods',
+  placeholder: '<method>[, <method>]*',
+  description: '指明资源可以被请求的方式有哪些(一个或者多个). 这个响应头信息在客户端发出预检请求的时候会被返回.'
+}];
 
 var getTimestamp = function() {
   return new Date().getTime();
@@ -89,6 +82,11 @@ $(function() {
     }
     $('.page', $dialog).html(_html);
     $dialog.removeClass('transparent');
+    if ($dialog.find('input')[0]) {
+      $dialog.find('input')[0].focus();
+    } else {
+      $dialog.find('button')[0].focus();
+    }
   };
 
   var hideDialog = function() {
@@ -96,6 +94,11 @@ $(function() {
     setTimeout(function() {
       $('.page', $dialog).empty();
     }, 300);
+  };
+
+  var storageHeaderValue = function(id, type, value) {
+    headerData[id][type] = value;
+    bgp.setConfig({ "headers": headerData }, initResponseHeaders);
   };
 
   var storageUrlData = function(urls) {
@@ -106,7 +109,6 @@ $(function() {
 
   var getDataByType = function(type, callback) {
     bgp.getConfig(type, function(data) {
-      // console.log('gets settings: ', data);
       callback(data);
     });
   };
@@ -155,11 +157,6 @@ $(function() {
       }
       storageUrlData(_urls);
     });
-  };
-
-  var storageHeaderValue = function(id, type, value) {
-    headerData[id][type] = value;
-    bgp.setConfig({ "headers": headerData }, initResponseHeaders);
   };
 
   // init
@@ -244,30 +241,20 @@ $(function() {
   var headerData;
 
   var initResponseHeaders = function() {
-
-    // init data;
     getDataByType('headers', function(data) {
       headerData = data.headers;
-      // console.log('headers: ', headerData);
 
       $.each(headers, function(index, header) {
         $.each(headerData, function(i, v) {
-          if(i === header.id) {
+          if (i === header.id) {
             $.extend(header, v);
             return false;
           }
-        })
-        // console.log(header)
-        // console.log(headers)
-        // $('#enable_access_control_'+index).prop('checked', value.active);
-        // $('#access_control_'+index).prop('disabled', !value.active);
-
-
-        // headers[index].value = value.value;
+        });
       });
 
       // render response header
-      var _html = template('response_headers_template', {headers: headers});
+      var _html = template('response_headers_template', { headers: headers });
       $('#response_headers .content').html(_html);
     });
   };
@@ -310,20 +297,34 @@ $(function() {
     });
 
     // response headers
-    $('#response_headers').on('change','input[type=checkbox]', function(e){
-      var id = e.target.id.replace('enable_access_control_','');
+    $('#response_headers').on('change', 'input[type=checkbox]', function(e) {
+      var id = e.target.id.replace('enable_access_control_', '');
       storageHeaderValue(id, 'active', $(this).prop('checked'));
     });
 
     $('#response_headers').on('keypress', 'input[type=text]', function(e) {
-      if(e.keyCode === 13) {
-        var id = e.target.id.replace('access_control_','');
+      if (e.keyCode === 13) {
+        var id = e.target.id.replace('access_control_', '');
         storageHeaderValue(id, 'value', $(this).val());
       }
-    }).on('blur', 'input[type=text]', initResponseHeaders)
+    }).on('blur', 'input[type=text]', initResponseHeaders);
+
+    $dialog.on('keypress', 'input[type=text]', function(e) {
+      if (e.keyCode === 13) {
+        $($('button', $dialog)[0]).click();
+      }
+    });
   };
 
   init();
 
   // i18n
+
+  // sync
+  chrome.extension.onRequest.addListener(
+    function(request, sender, sendResponse) {
+      if (request.onchange == "weui_check") {
+        initFilterList();
+      }
+    });
 });
