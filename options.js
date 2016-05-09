@@ -3,33 +3,52 @@ var headers = [{
   id: 'allow_origin',
   title: 'Access-Control-Allow-Origin',
   placeholder: '<origin> | *',
-  description: 'origin参数指定一个允许向该服务器提交请求的 URI.对于一个不带有 credentials 的请求,可以指定为\'*\',表示允许来自所有域的请求.'
+  description: chrome.i18n.getMessage("allow_origin_desc")
 }, {
   id: 'allow_headers',
   title: 'Access-Control-Allow-Headers',
   placeholder: '<field-name>[, <field-name>]*',
-  description: '在响应预检请求的时候使用.用来指明在实际的请求中,可以使用哪些自定义 HTTP 请求头'
+  description: chrome.i18n.getMessage("allow_headers_desc")
 }, {
   id: 'expose_headers',
   title: 'Access-Control-Expose-Headers',
   placeholder: '',
-  description: '设置浏览器允许访问的服务器的头信息的白名单'
+  description: chrome.i18n.getMessage("expose_headers_desc")
 }, {
   id: 'allow_credentials',
   title: 'Access-Control-Allow-Credentials',
   placeholder: 'true | false',
-  description: '告知客户端,当请求的 credientials 属性是  true 的时候,响应是否可以被得到.当它作为预请求的响应的一部分时,它用来告知实际的请求是否使用了 credentials. 注意,简单的GET请求不会预检,所以如果一个请求是为了得到一个带有 credentials的资源,而响应里又没有Access-Control-Allow-Credentials头信息,那么说明这个响应被忽略了.'
+  description: chrome.i18n.getMessage("allow_credentials_desc")
 }, {
   id: 'max_age',
   title: 'Access-Control-Max-Age',
   placeholder: '<delta-seconds>',
-  description: '这个头告诉我们这次预请求的结果的有效期是多久, delta-seconds 参数表示,允许这个预请求的参数缓存的秒数,在此期间,不用发出另一条预检请求. '
+  description: chrome.i18n.getMessage("max_age_desc")
 }, {
   id: 'allow_methods',
   title: 'Access-Control-Allow-Methods',
   placeholder: '<method>[, <method>]*',
-  description: '指明资源可以被请求的方式有哪些(一个或者多个). 这个响应头信息在客户端发出预检请求的时候会被返回.'
+  description: chrome.i18n.getMessage("allow_methods_desc")
 }];
+
+// i18n
+var lang = {
+  del: chrome.i18n.getMessage("delete"),
+  edit: chrome.i18n.getMessage("edit"),
+  more: chrome.i18n.getMessage("more"),
+  patterns: chrome.i18n.getMessage("url_patterns"),
+  enable: chrome.i18n.getMessage("enable"),
+  confirm: chrome.i18n.getMessage("confirm"),
+  cancel: chrome.i18n.getMessage("cancel"),
+  confirm_delete: chrome.i18n.getMessage("confirm_delete"),
+  settings: chrome.i18n.getMessage("CORS_Settings"),
+  headers: chrome.i18n.getMessage("response_headers"),
+  about: chrome.i18n.getMessage("about"),
+  new_filter: chrome.i18n.getMessage("new_filter"),
+  github: chrome.i18n.getMessage("project_on_github"),
+  list: chrome.i18n.getMessage("filter_url_patterns"),
+  save: chrome.i18n.getMessage("press_enter_to_save")
+};
 
 var getTimestamp = function() {
   return new Date().getTime();
@@ -37,47 +56,19 @@ var getTimestamp = function() {
 
 $(function() {
   var $dialog = $('#dialog');
-  var $list = $('#filter_list');
-
-  // menu list
-  $(".menu").on('click', 'a', function(e) {
-    var selected = "selected";
-    $(".mainview > *").removeClass(selected);
-
-    $(".menu li").removeClass(selected);
-
-    setTimeout(function() {
-      $(".mainview > *:not(.selected)").css("display", "none")
-    }, 100);
-
-    $(e.currentTarget).parent().addClass(selected);
-
-    var c = $($(e.currentTarget).attr("href"));
-
-    c.css("display", "block");
-
-    setTimeout(function() {
-      c.addClass(selected)
-    }, 0);
-
-    setTimeout(function() {
-      $("body").scrollTop = 0
-    }, 200);
-    return false;
-  });
 
   // dialog
   var showDialog = function(type, data) {
     var _html = "";
     switch (type) {
       case 'delete':
-        _html = template('delete_template', data);
+        _html = template('delete_template', { data: data, lang: lang });
         break;
       case 'add':
-        _html = template('add_edit_template', data);
+        _html = template('add_edit_template', { data: data, lang: lang });
         break;
       case 'edit':
-        _html = template('add_edit_template', data);
+        _html = template('add_edit_template', { data: data, lang: lang });
         break;
     }
     $('.page', $dialog).html(_html);
@@ -161,13 +152,21 @@ $(function() {
 
   // init
   var init = function() {
+    var _html = template('nav_template', lang);
+    $('nav.navigation').html(_html);
+
+    _html = template('mainview_template', lang);
+    $('.mainview').html(_html);
+
+    var $list = $('#filter_list');
+
     initDialog();
 
     initResponseHeaders();
 
     initFilterList();
 
-    bindEvents();
+    bindEvents($list);
   };
 
   var initDialog = function() {
@@ -200,6 +199,7 @@ $(function() {
           description: $('#url_description').val(),
         }
         saveUrl(_urlObj);
+
         hideDialog();
       } else {
         $url_pattern.focus();
@@ -230,9 +230,10 @@ $(function() {
     });
   };
 
-  var initFilterList = function() {
+  var initFilterList = function($list) {
+    var $list = $('#filter_list');
     getDataByType('urls', function(data) {
-      var _listHtml = template('filter_list_template', data);
+      var _listHtml = template('filter_list_template', { data: data, lang: lang });
       $list.html(_listHtml);
       // var lastUrl = data.urls.slice(-1).pop();
     });
@@ -254,12 +255,39 @@ $(function() {
       });
 
       // render response header
-      var _html = template('response_headers_template', { headers: headers });
+      var _html = template('response_headers_template', { headers: headers, lang: lang });
       $('#response_headers .content').html(_html);
     });
   };
 
-  var bindEvents = function() {
+  var bindEvents = function($list) {
+    // menu list
+    $(".menu").on('click', 'a', function(e) {
+      var selected = "selected";
+      $(".mainview > *").removeClass(selected);
+
+      $(".menu li").removeClass(selected);
+
+      setTimeout(function() {
+        $(".mainview > *:not(.selected)").css("display", "none")
+      }, 100);
+
+      $(e.currentTarget).parent().addClass(selected);
+
+      var c = $($(e.currentTarget).attr("href"));
+
+      c.css("display", "block");
+
+      setTimeout(function() {
+        c.addClass(selected)
+      }, 0);
+
+      setTimeout(function() {
+        $("body").scrollTop = 0
+      }, 200);
+      return false;
+    });
+
     // filter list events
     $list.on('click', '.del', function() {
       showDialog('delete', { type: 'delete', id: $(this).data('id') });
@@ -317,8 +345,6 @@ $(function() {
   };
 
   init();
-
-  // i18n
 
   // sync
   chrome.extension.onRequest.addListener(

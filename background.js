@@ -79,18 +79,27 @@ function reloadSettings() {
   });
 };
 
+function isEmpty(object) {
+  for(var key in object) {
+    if(object.hasOwnProperty(key)){
+      return false;
+    }
+  }
+  return true;
+}
+
 /*On Installed*/
 chrome.runtime.onInstalled.addListener(function() {
   getConfig('active', function(data) {
     // if is update save user config
-    if ($.isEmptyObject(data)) {
+    if (isEmpty(data)) {
       chrome.storage.local.set({
         "active": false,
         "urls": [{
           "id": 0,
           "active": true,
           "url": "<all_urls>",
-          "description": "匹配所有链接",
+          "description": chrome.i18n.getMessage("all_urls"),
           "last_modify": getTimestamp()
         }],
         "headers": {

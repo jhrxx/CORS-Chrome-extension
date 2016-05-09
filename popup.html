@@ -23,31 +23,32 @@
     </label>
     {{/each}}
   </script>
-
-  <div id="container" class="container">
+  <script id="container_template" type="text/html">
     <div class="cell">
-      <div class="weui_cells_title">启用跨站 HTTP 请求</div>
+      <div class="weui_cells_title">{{title}}</div>
       <div class="weui_cells weui_cells_form">
         <div class="weui_cell weui_cell_switch">
-          <div class="weui_cell_hd weui_cell_primary">跨源资源共享</div>
+          <div class="weui_cell_hd weui_cell_primary">{{cors}}</div>
           <div class="weui_cell_ft">
             <input class="weui_switch" type="checkbox" id="switch">
           </div>
         </div>
       </div>
-      <div class="weui_cells_title">启用过滤逻辑</div>
+      <div class="weui_cells_title">{{list}}</div>
       <div class="weui_cells weui_cells_checkbox weui_cells_access">
         <div id="filter_list"></div>
         <a class="weui_cell" id="options">
           <div class="weui_cell_bd weui_cell_primary">
-            <p>自定义</p>
+            <p>{{custom}}</p>
           </div>
           <div class="weui_cell_ft">
           </div>
         </a>
       </div>
     </div>
-  </div>
+  </script>
+
+  <div id="container" class="container"></div>
 
   <script src="/bower_components/zepto/zepto.min.js"></script>
   <script src="/bower_components/art-template/dist/template.js"></script>
