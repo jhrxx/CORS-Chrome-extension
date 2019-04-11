@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "art-template": "^4.13.2",
+    "chrome-bootstrap": "^1.5.0",
+    "weui": "^1.1.3",
+    "zepto": "^1.2.0"
+  }
+}
