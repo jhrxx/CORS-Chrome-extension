@@ -22,6 +22,11 @@
 Firefox v48+
 Chrome v22+
 
+本地开发
+---
+`$ npm install`
+打开浏览器开发模式，载入扩展程序目录
+
 License
 ---
 [反 996 许可证](LICENSE)

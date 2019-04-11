@@ -6,10 +6,13 @@
     "message": "跨源资源共享"
   },
   "filter_list": {
-    "message": "启用过滤逻辑"
+    "message": "过滤列表"
   },
   "options":{
     "message": "自定义"
+  },
+  "add_more":{
+    "message": "添加更多"
   },
   "delete":{
     "message": "删除"
@@ -17,11 +20,8 @@
   "edit":{
     "message": "编辑"
   },
-  "more":{
+  "more_details":{
     "message": "了解详情"
-  },
-  "url_patterns":{
-    "message": "验证 url 模式"
   },
   "enable":{
     "message": "启用"

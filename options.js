@@ -35,7 +35,7 @@ var headers = [{
 var lang = {
   del: chrome.i18n.getMessage("delete"),
   edit: chrome.i18n.getMessage("edit"),
-  more: chrome.i18n.getMessage("more"),
+  more_details: chrome.i18n.getMessage("more_details"),
   patterns: chrome.i18n.getMessage("url_patterns"),
   enable: chrome.i18n.getMessage("enable"),
   confirm: chrome.i18n.getMessage("confirm"),
@@ -349,7 +349,7 @@ $(function() {
   // sync
   chrome.extension.onRequest.addListener(
     function(request, sender, sendResponse) {
-      if (request.onchange == "weui_check") {
+      if (request.onchange == "weui-check") {
         initFilterList();
       }
     });

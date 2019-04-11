@@ -1,8 +1,6 @@
 $(function() {
   var bgp = chrome.extension.getBackgroundPage();
 
-
-
   // init switch and filter list
   bgp.getConfig(['active', 'urls'], function(data) {
     // prevent list to lang to display scroll bar
@@ -13,16 +11,18 @@ $(function() {
       title: chrome.i18n.getMessage("enable_cross_origin_resource_sharing"),
       cors: chrome.i18n.getMessage("CORS"),
       list: chrome.i18n.getMessage("filter_list"),
-      custom: chrome.i18n.getMessage("options")
+      custom: chrome.i18n.getMessage("options"),
+      add_more: chrome.i18n.getMessage("add_more")
     }
 
-    html = template('container_template', lang);
+    var containerHtml = template('container_template', lang);
 
-    $('#container').html(html);
+    $('#container').html(containerHtml);
 
-    html = template('filter_list_template', data);
+    // var filterListHtml = template('filter__template', data);
+    var filterListHtml = template('filter_list_template',{urls:data.urls});
 
-    $('#filter_list').html(html);
+    $('#filter_list').html(filterListHtml);
 
     var $switch = $('#switch');
 
@@ -41,7 +41,7 @@ $(function() {
       bgp.setConfig({ "active": e.target.checked });
     });
 
-    $('#filter_list').on('change', '.weui_check', function(e) {
+    $('#filter_list').on('change', '.weui-check', function(e) {
       var _target = e.target;
       bgp.getConfig("urls", function(data) {
         var _id = parseInt(_target.id.replace('fu_', ''));
@@ -79,7 +79,7 @@ $(function() {
     var optionsUrl = chrome.extension.getURL('options.html');
     chrome.tabs.query({ url: optionsUrl }, function(tabs) {
       if (tabs.length === 1) {
-        chrome.tabs.sendRequest(tabs[0].id, { onchange: "weui_check" });
+        chrome.tabs.sendRequest(tabs[0].id, { onchange: "weui-check" });
       }
     });
   };

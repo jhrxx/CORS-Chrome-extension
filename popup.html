@@ -1,57 +1,51 @@
 <!doctype html>
 <html>
-
 <head>
-  <title>Getting Started Extension's Popup</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="/popup.css">
-  <link rel="stylesheet" href="/bower_components/weui/dist/style/weui.css">
+  <link rel="stylesheet" href="/node_modules/weui/dist/style/weui.min.css">
 </head>
 
 <body>
   <script id="filter_list_template" type="text/html">
     {{each urls}}
-    <label class="weui_cell weui_check_label" for="fu_{{$value.id}}">
-      <div class="weui_cell_hd">
-        <input type="checkbox" class="weui_check" name="checkbox" id="fu_{{$value.id}}" {{if $value.active}} checked{{/if}}>
-        <i class="weui_icon_checked"></i>
-      </div>
-      <div class="weui_cell_bd weui_cell_primary">
-        <p>{{$value.url}}</p>
-      </div>
-      <div class="weui_cell_ft">{{$value.description}}</div>
+    <label class="weui-cell weui-check__label" for="fu_{{$value.id}}">
+        <div class="weui-cell__hd">
+            <input type="checkbox" class="weui-check" name="checkbox1" id="fu_{{$value.id}}" {{if $value.active}} checked{{/if}}>
+            <i class="weui-icon-checked"></i>
+        </div>
+        <div class="weui-cell__bd">
+            <p>{{$value.url}}</p>
+        </div>
+        <div class="weui-cell__ft">{{$value.description}}</div>
     </label>
     {{/each}}
   </script>
   <script id="container_template" type="text/html">
     <div class="cell">
-      <div class="weui_cells_title">{{title}}</div>
-      <div class="weui_cells weui_cells_form">
-        <div class="weui_cell weui_cell_switch">
-          <div class="weui_cell_hd weui_cell_primary">{{cors}}</div>
-          <div class="weui_cell_ft">
-            <input class="weui_switch" type="checkbox" id="switch">
+      <div class="weui-cells__title">{{title}}</div>
+      <div class="weui-cells weui-cells_form">
+          <div class="weui-cell weui-cell_switch">
+              <div class="weui-cell__bd">{{cors}}</div>
+              <div class="weui-cell__ft">
+                  <input id="switch" class="weui-switch" type="checkbox" checked/>
+              </div>
           </div>
-        </div>
       </div>
-      <div class="weui_cells_title">{{list}}</div>
-      <div class="weui_cells weui_cells_checkbox weui_cells_access">
-        <div id="filter_list"></div>
-        <a class="weui_cell" id="options">
-          <div class="weui_cell_bd weui_cell_primary">
-            <p>{{custom}}</p>
-          </div>
-          <div class="weui_cell_ft">
-          </div>
-        </a>
+      <div class="weui-cells__title">{{list}}</div>
+      <div class="weui-cells weui-cells_checkbox">
+          <div id="filter_list"></div>
+          <a href="javascript:void(0);" id="options" class="weui-cell weui-cell_link">
+              <div class="weui-cell__bd">{{add_more}}</div>
+          </a>
       </div>
     </div>
   </script>
 
   <div id="container" class="container"></div>
 
-  <script src="/bower_components/zepto/zepto.min.js"></script>
-  <script src="/bower_components/art-template/dist/template.js"></script>
+  <script src="/node_modules/zepto/dist/zepto.min.js"></script>
+  <script src="/node_modules/art-template/lib/template-web.js"></script>
   <script src="popup.js"></script>
 </body>
 

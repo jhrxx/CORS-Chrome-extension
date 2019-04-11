@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>CORS-Settings</title>
-    <link href="/bower_components/chrome-bootstrap/chrome-bootstrap.css" rel="stylesheet">
+    <link href="/node_modules/chrome-bootstrap/chrome-bootstrap.min.css" rel="stylesheet">
     <link href="/options.css" rel="stylesheet">
   </head>
 
@@ -28,7 +28,7 @@
           <input id="url_pattern" type="text" placeholder="Intercepted URLs or URL patterns" {{if data.type==='edit' }} value="{{data.pattern}}" {{/if}}>
         </div>
         <div class="row">
-          <a target="_blank" href="https://developer.chrome.com/extensions/match_patterns">{{lang.more}}</a> &nbsp;
+          <a target="_blank" href="https://developer.chrome.com/extensions/match_patterns">{{lang.more_details}}</a> &nbsp;
           <a target="_blank" href="https://www.google.com/support/enterprise/static/gsa/docs/admin/74/gsa_doc_set/admin_crawl/url_patterns.html#1076127">{{lang.patterns}}</a>
         </div>
         <div class="row">
@@ -134,8 +134,8 @@
       <section class="page"></section>
     </article>
 
-    <script src="/bower_components/zepto/zepto.js"></script>
-    <script src="/bower_components/art-template/dist/template.js"></script>
+    <script src="/node_modules/zepto/dist/zepto.min.js"></script>
+    <script src="/node_modules/art-template/lib/template-web.js"></script>
     <script src="./options.js"></script>
   </body>
 </html>

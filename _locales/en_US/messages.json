@@ -11,14 +11,17 @@
   "options":{
     "message": "Options"
   },
+  "add_more":{
+    "message": "Add More"
+  },
   "delete":{
     "message": "Delete"
   },
   "edit":{
     "message": "Edit"
   },
-  "more":{
-    "message": "More"
+  "more_details":{
+    "message": "More Details"
   },
   "url_patterns":{
     "message": "Url patterns"
