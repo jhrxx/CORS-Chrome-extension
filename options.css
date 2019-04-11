@@ -82,3 +82,10 @@ body {
   /*display: inline;*/
   cursor: pointer;
 }
+.navigation {
+  margin-left: 10px;
+}
+.mainview {
+  margin-left: 180px;
+  /* -moz-transform:rotate(7deg); */
+}
