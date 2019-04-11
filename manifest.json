@@ -1,9 +1,8 @@
 {
   "manifest_version": 2,
-
-  "name": "CORS",
-  "description": "This extension shows a Google Image search result for the current page",
-  "version": "1.0",
+  "name": "CORS-Chrome-extension",
+  "description": "This extension work in both Firefox and Chrome, allows developer config rules in response header within Ajax request.",
+  "version": "1.1",
   "homepage_url": "https://github.com/jhrxx/CORS-Chrome-extension",
   "default_locale": "en_US",
 
