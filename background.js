@@ -25,13 +25,25 @@ function setConfig(value, callback) {
 }
 
 function headersReceivedListener(details) {
+  var _headers = [],
+    _arr = []
   for (item in headersCfg) {
     if (headersCfg[item].active) {
-      details.responseHeaders.push({ name: headers[item], value: headersCfg[item].value });
+      _headers.push({
+        name: headers[item],
+        value: headersCfg[item].value
+      });
+      _arr.push(headers[item])
     }
   }
 
-  return { responseHeaders: details.responseHeaders };
+  for (var i = details.responseHeaders.length - 1; i >= 0; i--) {
+    if (_arr.indexOf(details.responseHeaders[i].name) === -1) {
+      _headers.push(details.responseHeaders[i])
+    }
+  }
+
+  return {  responseHeaders: _headers };
 };
 
 var headers = {
