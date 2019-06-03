@@ -5,14 +5,17 @@
   "CORS": {
     "message": "跨源资源共享"
   },
-  "filter_list": {
-    "message": "过滤列表"
+  "white_list": {
+    "message": "白名单"
   },
   "options":{
     "message": "自定义"
   },
   "add_more":{
     "message": "添加更多"
+  },
+  "add":{
+    "message": "新增"
   },
   "delete":{
     "message": "删除"
@@ -25,6 +28,9 @@
   },
   "enable":{
     "message": "启用"
+  },
+  "description": {
+    "message": "备注"
   },
   "confirm":{
     "message": "确定"
@@ -59,9 +65,6 @@
   "url_patterns":{
     "message": "Url 模式"
   },
-  "press_enter_to_save": {
-    "message": "按 Enter 保存"
-  },
   "allow_origin_desc": {
     "message": "origin 参数指定一个允许向该服务器提交请求的 URI. 对于一个不带有 credentials 的请求, 可以指定为'*', 表示允许来自所有域的请求."
   },
@@ -79,5 +82,14 @@
   },
   "allow_methods_desc": {
     "message": "指明资源可以被请求的方式有哪些 (一个或者多个). 这个响应头信息在客户端发出预检请求的时候会被返回."
+  },
+  "about_content": {
+    "message": "CORS dev tool 可以让你自定义规则到 HTTP 响应头，你可以添加 Access-Control-Allow-Origin：http://localhost:3000 规则到响应头，允许CORS本地开发，规避浏览器的跨域请求拦截。"
+  },
+  "pattern_placeholder": {
+    "message": "URL或URL模式"
+  },
+  "desc_placeholder": {
+    "message": "选填"
   }
 }

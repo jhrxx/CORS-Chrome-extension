@@ -5,14 +5,17 @@
   "CORS": {
     "message": "Cross-Origin Resource Sharing"
   },
-  "filter_list": {
-    "message": "Filter list"
+  "white_list": {
+    "message": "White List"
   },
   "options":{
     "message": "Options"
   },
   "add_more":{
     "message": "Add More"
+  },
+  "add":{
+    "message": "Add"
   },
   "delete":{
     "message": "Delete"
@@ -24,10 +27,13 @@
     "message": "More Details"
   },
   "url_patterns":{
-    "message": "Url patterns"
+    "message": "Url Patterns"
   },
   "enable":{
     "message": "Enable"
+  },
+  "description": {
+    "message": "Description"
   },
   "confirm":{
     "message": "Confirm"
@@ -42,7 +48,7 @@
     "message": "CORS Settings"
   },
   "response_headers":{
-    "message": "HTTP response headers"
+    "message": "HTTP Response Headers"
   },
   "about":{
     "message": "About"
@@ -62,9 +68,6 @@
   "urls":{
     "message": "URLs"
   },
-  "press_enter_to_save": {
-    "message": "press enter to save"
-  },
   "allow_origin_desc": {
     "message": "The origin parameter specifies a URI that may access the resource.  The browser must enforce this.  For requests without credentials, the server may specify '*' as a wildcard, thereby allowing any origin to access the resource."
   },
@@ -82,5 +85,14 @@
   },
   "allow_methods_desc": {
     "message": "Specifies the method or methods allowed when accessing the resource.  This is used in response to a preflight request."
+  },
+  "about_content": {
+    "message": "CORS dev tool allows you to customize the rules to the HTTP response header. You can add the `Access-Control-Allow-Origin:http://localhost:3000` rule to the response header to allow CORS to be developed locally. Avoid cross-domain request interception by the browser."
+  },
+  "pattern_placeholder": {
+    "message": "Intercepted URLs or URL patterns"
+  },
+  "desc_placeholder": {
+    "message": "Optional"
   }
 }

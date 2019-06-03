@@ -4,7 +4,7 @@ const optionsUrl = chrome.runtime.getURL('options.html')
 const lang = {
   title: chrome.i18n.getMessage('enable_cross_origin_resource_sharing'),
   cors: chrome.i18n.getMessage('CORS'),
-  list: chrome.i18n.getMessage('filter_list'),
+  list: chrome.i18n.getMessage('white_list'),
   custom: chrome.i18n.getMessage('options'),
   more_details: chrome.i18n.getMessage('more_details')
 }
@@ -30,7 +30,7 @@ const syncOptions = () => {
 
 const eventHandler = () => {
   const bindEvents = () => {
-    const $inputs = document.querySelectorAll('#filter_list .weui-check')
+    const $inputs = document.querySelectorAll('#white_list .weui-check')
 
     document.getElementById('switch').addEventListener('change', function(event) {
       bgp.setConfig({ active: event.target.checked })
@@ -81,7 +81,7 @@ const eventHandler = () => {
       return item
     })
 
-    let filterListHtml = tmpl('filter_list_template', { urls })
+    let filterListHtml = tmpl('white_list_template', { urls })
     // console.log('filterListHtml: ', filterListHtml)
     let containerHtml = tmpl('container_template', { data, lang, filterListHtml })
     // console.log('containerHtml: ', containerHtml)

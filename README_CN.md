@@ -1,10 +1,10 @@
-欢迎使用 CORS-Chrome-extension 浏览器扩展
+欢迎使用 CORS Helper 浏览器扩展
 =======
 
 [![Badge](https://img.shields.io/badge/link-996.icu-%23FF4D5B.svg)](https://996.icu/#/en_US)
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
-**CORS-Chrome-extension** 可以让你自定义规则到 HTTP 响应头，你可以添加 `Access-Control-Allow-Origin：http://localhost:3000` 规则到响应头，允许CORS本地开发，规避浏览器的跨域请求拦截。
+**CORS Helper** 可以让你自定义规则到 HTTP 响应头，你可以添加 `Access-Control-Allow-Origin：http://localhost:3000` 规则到响应头，允许CORS本地开发，规避浏览器的跨域请求拦截。
 
 使用方法
 ---
