@@ -1,133 +1,143 @@
-var getTimestamp = function() {
-  return new Date().getTime();
-};
-
-function getConfig(keys, callback) {
-  chrome.storage.local.get(keys, callback);
+const getTimestamp = function() {
+  return new Date().getTime()
 }
 
-function setConfig(value, callback) {
-  if (typeof callback !== 'function') {
-    callback = function() {};
-  }
-
-  // Save it using the Chrome extension storage API.
-  chrome.storage.local.set(value, function() {
-    if ('active' in value) {
-      var _icon = value.active ? 'on' : 'off';
-      chrome.browserAction.setIcon({ path: _icon + ".png" });
-    }
-
-    reloadSettings();
-
-    callback();
-  });
-}
-
-function headersReceivedListener(details) {
-  var _headers = [],
-    _arr = []
-  for (item in headersCfg) {
-    if (headersCfg[item].active) {
-      _headers.push({
-        name: headers[item],
-        value: headersCfg[item].value
-      });
-      _arr.push(headers[item])
-    }
-  }
-
-  for (var i = details.responseHeaders.length - 1; i >= 0; i--) {
-    if (_arr.indexOf(details.responseHeaders[i].name) === -1) {
-      _headers.push(details.responseHeaders[i])
-    }
-  }
-
-  return {  responseHeaders: _headers };
-};
-
-var headers = {
+const headerObjs = {
   allow_origin: 'Access-Control-Allow-Origin',
   allow_headers: 'Access-Control-Allow-Headers',
   expose_headers: 'Access-Control-Expose-Headers',
   allow_credentials: 'Access-Control-Allow-Credentials',
   max_age: 'Access-Control-Max-Age',
   allow_methods: 'Access-Control-Allow-Methods'
-};
+}
 
-var headersCfg;
+let headersCfg
+
+function headersReceivedListener(details) {
+  let { responseHeaders } = details
+  const keys = responseHeaders.map(header=>header.name)
+  // console.log('headersReceivedListener: ', responseHeaders)
+  // console.log('headersCfg: ', headersCfg)
+
+  for (let [key, value] of Object.entries(headersCfg)) {
+      // console.log(
+      //     `${JSON.stringify(key)}: ${JSON.stringify(value)}`
+      // );
+      if(value.active) {
+          let index = keys.indexOf(headerObjs[key])
+          let data = { name: headerObjs[key], value: value.value}
+          if(index === -1) {
+              responseHeaders.push(data)
+          } else {
+              responseHeaders[index] = data
+          }
+      }
+  }
+
+  // console.log({ responseHeaders })
+
+  return { responseHeaders }
+}
 
 /*Reload settings*/
 function reloadSettings() {
-  getConfig(['active', 'urls', 'headers'], function(data) {
-    headersCfg = data.headers;
+  /*Remove Listeners*/
+  /*
+   * onHeadersReceived (optionally synchronous)
+   * Fires each time that an HTTP(S) response header is received.
+   * Due to redirects and authentication requests this can happen multiple times per request.
+   * This event is intended to allow extensions to add, modify, and delete response headers,
+   * such as incoming Set-Cookie headers.
+   * The caching directives are processed before this event is triggered,
+   * so modifying headers such as Cache-Control has no influence on the browser's cache.
+   * It also allows you to redirect the request.
+   */
+  chrome.webRequest.onHeadersReceived.removeListener(headersReceivedListener)
 
-    var _urls = [];
+  getConfig(['active', 'urls', 'headers'], (data) => {
+      // console.log('getConfig: ', data)
+      headersCfg = data.headers
+      if (data && data.urls && data.urls.length > 0) {
+          const urls = data.urls
+              .filter(url => url.active)
+              .map(data => data.url)
 
-    for (var i = data.urls.length - 1; i >= 0; i--) {
-      if (data.urls[i].active) {
-        _urls.push(data.urls[i].url);
+          if (data.active && urls.length > 0) {
+              // console.log('addListener: ', urls)
+              chrome.webRequest.onHeadersReceived.addListener(
+                  headersReceivedListener,
+                  { urls },
+                  ['blocking', 'responseHeaders']
+              )
+          }
       }
-    };
-
-    /*Remove Listeners*/
-    /*
-     * onHeadersReceived (optionally synchronous)
-     * Fires each time that an HTTP(S) response header is received.
-     * Due to redirects and authentication requests this can happen multiple times per request.
-     * This event is intended to allow extensions to add, modify, and delete response headers,
-     * such as incoming Set-Cookie headers.
-     * The caching directives are processed before this event is triggered,
-     * so modifying headers such as Cache-Control has no influence on the browser's cache.
-     * It also allows you to redirect the request.
-     */
-    chrome.webRequest.onHeadersReceived.removeListener(headersReceivedListener);
-
-    if (data.active) {
-      chrome.webRequest.onHeadersReceived.addListener(headersReceivedListener, {
-        urls: _urls
-      }, ["blocking", "responseHeaders"]);
-    }
-  });
-};
-
-function isEmpty(object) {
-  for(var key in object) {
-    if(object.hasOwnProperty(key)){
-      return false;
-    }
-  }
-  return true;
+  })
 }
 
-/*On Installed*/
-chrome.runtime.onInstalled.addListener(function() {
-  getConfig('active', function(data) {
-    // if is update save user config
-    if (isEmpty(data)) {
-      chrome.storage.local.set({
-        "active": false,
-        "urls": [{
-          "id": 0,
-          "active": true,
-          "url": "<all_urls>",
-          "description": chrome.i18n.getMessage("all_urls"),
-          "last_modify": getTimestamp()
-        }],
-        "headers": {
-          allow_origin: { active: true, value: '*' },
-          allow_headers: { active: false, value: '' },
-          expose_headers: { active: false, value: '' },
-          allow_credentials: { active: false, value: '' },
-          max_age: { active: false, value: '' },
-          allow_methods: { active: true, value: "GET, PUT, POST" }
-        }
-      });
+function getConfig(keys, callback) {
+  // console.log('getConfig: ', keys)
+  chrome.storage.local.get(keys, callback)
+}
 
-      reloadSettings();
-    }
+function setConfig(value, callback) {
+  // console.log('setConfig: ', value)
+  if (typeof callback !== 'function') {
+      callback = function() {}
+  }
+
+  // Save it using the browser extension storage API.
+  chrome.storage.local.set(value, () => {
+      if ('active' in value) {
+          setIcon(value.active)
+      }
+
+
+      reloadSettings()
+
+      callback()
   })
-});
+}
+
+function setIcon(state){
+  let icon = state ? 'on' : 'off'
+  chrome.browserAction.setIcon({ path: `${icon}.png` })
+}
 
 //  add listener after enabled/installed
-reloadSettings();
+chrome.runtime.onInstalled.addListener(() => {
+  getConfig('active', data => {
+      // if is update save user config
+      if (Object.keys(data).length === 0) {
+          chrome.storage.local.set({
+              active: false,
+              urls: [
+                  {
+                      id: 0,
+                      active: true,
+                      url: '<all_urls>',
+                      description: chrome.i18n.getMessage('all_urls'),
+                      last_modify: getTimestamp()
+                  }
+              ],
+              headers: {
+                  allow_origin: { active: true, value: '*' },
+                  allow_headers: { active: false, value: '' },
+                  expose_headers: { active: false, value: '' },
+                  allow_credentials: { active: false, value: '' },
+                  max_age: { active: false, value: '' },
+                  allow_methods: { active: true, value: 'GET, PUT, POST' }
+              }
+          })
+          reloadSettings()
+      }
+
+  })
+})
+
+reloadSettings()
+
+getConfig('active', data => {
+  if (Object.keys(data).length !== 0) {
+      setIcon(data.active)
+  }
+})

@@ -1,86 +1,100 @@
-$(function() {
-  var bgp = chrome.extension.getBackgroundPage();
+const bgp = chrome.extension.getBackgroundPage()
+const optionsUrl = chrome.runtime.getURL('options.html')
 
-  // init switch and filter list
-  bgp.getConfig(['active', 'urls'], function(data) {
-    // prevent list to lang to display scroll bar
-    if (data.urls.length > 8) {
-      data.urls.length = 8;
+const lang = {
+  title: chrome.i18n.getMessage('enable_cross_origin_resource_sharing'),
+  cors: chrome.i18n.getMessage('CORS'),
+  list: chrome.i18n.getMessage('filter_list'),
+  custom: chrome.i18n.getMessage('options'),
+  more_details: chrome.i18n.getMessage('more_details')
+}
+
+const convert = str => {
+  str = str.replace(/&/g, '&amp;')
+  str = str.replace(/>/g, '&gt;')
+  str = str.replace(/</g, '&lt;')
+  str = str.replace(/"/g, '&quot;')
+  str = str.replace(/'/g, '&#039;')
+  return str
+}
+
+ // sync option page data
+const syncOptions = () => {
+  // TODO: refreash option page
+  chrome.tabs.query({ url: optionsUrl }, tabs => {
+    if (tabs.length === 1) {
+      chrome.tabs.sendMessage(tabs[0].id, { onchange: 'weui-check' })
     }
-    var lang = {
-      title: chrome.i18n.getMessage("enable_cross_origin_resource_sharing"),
-      cors: chrome.i18n.getMessage("CORS"),
-      list: chrome.i18n.getMessage("filter_list"),
-      custom: chrome.i18n.getMessage("options"),
-      add_more: chrome.i18n.getMessage("add_more")
+  })
+}
+
+const eventHandler = () => {
+  const bindEvents = () => {
+    const $inputs = document.querySelectorAll('#filter_list .weui-check')
+
+    document.getElementById('switch').addEventListener('change', function(event) {
+      bgp.setConfig({ active: event.target.checked })
+    })
+
+    for (const input of $inputs) {
+      input.addEventListener('click', function(event) {
+        const id = parseInt(event.target.dataset['key'])
+        bgp.getConfig('urls', ({urls}) => {
+          urls = urls.map(url=>{
+            if (url.id === id) {
+              url.active = event.target.checked
+            }
+            return url
+          })
+
+          bgp.setConfig({ urls }, syncOptions)
+        })
+      })
     }
 
-    var containerHtml = template('container_template', lang);
-
-    $('#container').html(containerHtml);
-
-    // var filterListHtml = template('filter__template', data);
-    var filterListHtml = template('filter_list_template',{urls:data.urls});
-
-    $('#filter_list').html(filterListHtml);
-
-    var $switch = $('#switch');
-
-    bindEvents($switch);
-
-    // set active icon
-    var _icon = data.active ? 'on' : 'off';
-    chrome.browserAction.setIcon({ path: _icon + ".png" });
-
-    // set switch status
-    $switch.prop('checked', data.active);
-  });
-
-  var bindEvents = function($switch) {
-    $switch.on('change', function(e) {
-      bgp.setConfig({ "active": e.target.checked });
-    });
-
-    $('#filter_list').on('change', '.weui-check', function(e) {
-      var _target = e.target;
-      bgp.getConfig("urls", function(data) {
-        var _id = parseInt(_target.id.replace('fu_', ''));
-        $.each(data.urls, function(i, v) {
-          if (v.id === _id) {
-            v.active = _target.checked;
-            return false;
-          }
-        });
-        bgp.setConfig({ "urls": data.urls });
-        // TODO  refreash option page
-        sync();
-      });
-    });
-
-    $('#options').click(function() {
-      var optionsUrl = chrome.extension.getURL('options.html');
+    document.getElementById('options').addEventListener('click', event => {
+      event.preventDefault()
 
       chrome.tabs.query({ url: optionsUrl }, function(tabs) {
         // if option page is open, actcive option page
         if (tabs.length === 1) {
           if (!tabs[0].active) {
-            chrome.tabs.update(tabs[0].id, { active: true });
+            chrome.tabs.update(tabs[0].id, { active: true })
           }
         } else {
-          chrome.tabs.create({ url: optionsUrl });
+          chrome.tabs.create({ url: optionsUrl })
         }
-      });
-      return false;
-    });
-  };
+      })
+    })
+  }
 
-  // sync option page data
-  var sync = function() {
-    var optionsUrl = chrome.extension.getURL('options.html');
-    chrome.tabs.query({ url: optionsUrl }, function(tabs) {
-      if (tabs.length === 1) {
-        chrome.tabs.sendRequest(tabs[0].id, { onchange: "weui-check" });
-      }
-    });
-  };
-});
+  // init switch and filter list
+  bgp.getConfig(['active', 'urls'], function(data) {
+    // prevent list to long to display scroll bar
+    if (data.urls.length > 8) {
+      data.urls.length = 8
+    }
+
+    const urls = data.urls.map(item => {
+      item.url = convert(item.url)
+      item.description = convert(item.description)
+      return item
+    })
+
+    let filterListHtml = tmpl('filter_list_template', { urls })
+    // console.log('filterListHtml: ', filterListHtml)
+    let containerHtml = tmpl('container_template', { data, lang, filterListHtml })
+    // console.log('containerHtml: ', containerHtml)
+    document.getElementById('container').innerHTML = containerHtml
+
+    bindEvents()
+
+    // set active icon
+    bgp.setIcon(data.active)
+
+    // set switch status
+    // document.getElementById('switch').setAttribute('checked', data.active)
+  })
+}
+
+document.addEventListener('DOMContentLoaded', eventHandler)

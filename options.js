@@ -1,356 +1,418 @@
-var bgp = chrome.extension.getBackgroundPage();
-var headers = [{
-  id: 'allow_origin',
-  title: 'Access-Control-Allow-Origin',
-  placeholder: '<origin> | *',
-  description: chrome.i18n.getMessage("allow_origin_desc")
-}, {
-  id: 'allow_headers',
-  title: 'Access-Control-Allow-Headers',
-  placeholder: '<field-name>[, <field-name>]*',
-  description: chrome.i18n.getMessage("allow_headers_desc")
-}, {
-  id: 'expose_headers',
-  title: 'Access-Control-Expose-Headers',
-  placeholder: '',
-  description: chrome.i18n.getMessage("expose_headers_desc")
-}, {
-  id: 'allow_credentials',
-  title: 'Access-Control-Allow-Credentials',
-  placeholder: 'true | false',
-  description: chrome.i18n.getMessage("allow_credentials_desc")
-}, {
-  id: 'max_age',
-  title: 'Access-Control-Max-Age',
-  placeholder: '<delta-seconds>',
-  description: chrome.i18n.getMessage("max_age_desc")
-}, {
-  id: 'allow_methods',
-  title: 'Access-Control-Allow-Methods',
-  placeholder: '<method>[, <method>]*',
-  description: chrome.i18n.getMessage("allow_methods_desc")
-}];
-
+const bgp = chrome.extension.getBackgroundPage()
+const headers = [
+    {
+        id: 'allow_origin',
+        title: 'Access-Control-Allow-Origin',
+        placeholder: '<origin> | *',
+        description: chrome.i18n.getMessage('allow_origin_desc')
+    },
+    {
+        id: 'allow_headers',
+        title: 'Access-Control-Allow-Headers',
+        placeholder: '<field-name>[, <field-name>]*',
+        description: chrome.i18n.getMessage('allow_headers_desc')
+    },
+    {
+        id: 'expose_headers',
+        title: 'Access-Control-Expose-Headers',
+        placeholder: '',
+        description: chrome.i18n.getMessage('expose_headers_desc')
+    },
+    {
+        id: 'allow_credentials',
+        title: 'Access-Control-Allow-Credentials',
+        placeholder: 'true | false',
+        description: chrome.i18n.getMessage('allow_credentials_desc')
+    },
+    {
+        id: 'max_age',
+        title: 'Access-Control-Max-Age',
+        placeholder: '<delta-seconds>',
+        description: chrome.i18n.getMessage('max_age_desc')
+    },
+    {
+        id: 'allow_methods',
+        title: 'Access-Control-Allow-Methods',
+        placeholder: '<method>[, <method>]*',
+        description: chrome.i18n.getMessage('allow_methods_desc')
+    }
+]
 // i18n
-var lang = {
-  del: chrome.i18n.getMessage("delete"),
-  edit: chrome.i18n.getMessage("edit"),
-  more_details: chrome.i18n.getMessage("more_details"),
-  patterns: chrome.i18n.getMessage("url_patterns"),
-  enable: chrome.i18n.getMessage("enable"),
-  confirm: chrome.i18n.getMessage("confirm"),
-  cancel: chrome.i18n.getMessage("cancel"),
-  confirm_delete: chrome.i18n.getMessage("confirm_delete"),
-  settings: chrome.i18n.getMessage("CORS_Settings"),
-  headers: chrome.i18n.getMessage("response_headers"),
-  about: chrome.i18n.getMessage("about"),
-  new_filter: chrome.i18n.getMessage("new_filter"),
-  github: chrome.i18n.getMessage("project_on_github"),
-  list: chrome.i18n.getMessage("filter_url_patterns"),
-  save: chrome.i18n.getMessage("press_enter_to_save")
-};
+const lang = {
+    add: chrome.i18n.getMessage('add'),
+    del: chrome.i18n.getMessage('delete'),
+    edit: chrome.i18n.getMessage('edit'),
+    more_details: chrome.i18n.getMessage('more_details'),
+    patterns: chrome.i18n.getMessage('url_patterns'),
+    enable: chrome.i18n.getMessage('enable'),
+    confirm: chrome.i18n.getMessage('confirm'),
+    cancel: chrome.i18n.getMessage('cancel'),
+    confirm_delete: chrome.i18n.getMessage('confirm_delete'),
+    settings: chrome.i18n.getMessage('CORS_Settings'),
+    headers: chrome.i18n.getMessage('response_headers'),
+    about: chrome.i18n.getMessage('about'),
+    new_filter: chrome.i18n.getMessage('new_filter'),
+    github: chrome.i18n.getMessage('project_on_github'),
+    list: chrome.i18n.getMessage('filter_url_patterns'),
+    description: chrome.i18n.getMessage('description'),
+    about_content: chrome.i18n.getMessage('about_content'),
+    more_details_url: `https://developer.mozilla.org/${chrome.i18n.getUILanguage()}/docs/Mozilla/Add-ons/WebExtensions/Match_patterns`
+}
 
-var getTimestamp = function() {
-  return new Date().getTime();
-};
+const convert = str => {
+    str = str.replace(/&/g, '&amp;')
+    str = str.replace(/>/g, '&gt;')
+    str = str.replace(/</g, '&lt;')
+    str = str.replace(/"/g, '&quot;')
+    str = str.replace(/'/g, '&#039;')
+    return str
+}
 
-$(function() {
-  var $dialog = $('#dialog');
+const getTimestamp = function() {
+    return new Date().getTime()
+}
 
-  // dialog
-  var showDialog = function(type, data) {
-    var _html = "";
-    switch (type) {
-      case 'delete':
-        _html = template('delete_template', { data: data, lang: lang });
-        break;
-      case 'add':
-        _html = template('add_edit_template', { data: data, lang: lang });
-        break;
-      case 'edit':
-        _html = template('add_edit_template', { data: data, lang: lang });
-        break;
-    }
-    $('.page', $dialog).html(_html);
-    $dialog.removeClass('transparent');
-    if ($dialog.find('input')[0]) {
-      $dialog.find('input')[0].focus();
-    } else {
-      $dialog.find('button')[0].focus();
-    }
-  };
-
-  var hideDialog = function() {
-    $dialog.addClass('transparent');
-    setTimeout(function() {
-      $('.page', $dialog).empty();
-    }, 300);
-  };
-
-  var storageHeaderValue = function(id, type, value) {
-    headerData[id][type] = value;
-    bgp.setConfig({ "headers": headerData }, initResponseHeaders);
-  };
-
-  var storageUrlData = function(urls) {
-    // storage url list data
-    // after saving rander filter list
-    bgp.setConfig({ "urls": urls }, initFilterList);
-  };
-
-  var getDataByType = function(type, callback) {
-    bgp.getConfig(type, function(data) {
-      callback(data);
-    });
-  };
-
-  // Url List
-  var getUrlIndexById = function(urls, id) {
-    var index = -1;
-    $.each(urls, function(i, value) {
-      if (value.id === id) {
-        index = i;
-        return false;
-      }
+const storageHeaderValue = (id, type, value) => {
+    bgp.getConfig('headers', ({ headers: headerData }) => {
+        headerData[id][type] = value
+        bgp.setConfig({ headers: headerData })
     })
-    return index;
-  };
+}
 
-  var deleteUrlById = function(id) {
-    bgp.getConfig('urls', function(data) {
-      var _urls = [];
-      _urls = _urls.concat(data.urls);
-      var _index = getUrlIndexById(data.urls, id);
-      if (_index > 0) {
-        _urls.splice(_index, 1);
-        storageUrlData(_urls);
-      }
-    });
-  };
+const storageUrlData = (urls, callback) => {
+    // storage url list data
+    bgp.setConfig({ urls: urls }, callback)
+}
 
-  var saveUrl = function(newValue) {
-    bgp.getConfig('urls', function(data) {
-      var _urls = [];
-      if ('id' in newValue) {
-        // edit
-        var _index = getUrlIndexById(data.urls, newValue.id);
-        var _obj = $.extend(data.urls[_index], newValue);
-        _urls = _urls.concat(data.urls);
-        _obj.last_modify = getTimestamp();
-        _urls[_index] = _obj;
-      } else {
-        // add
-        var _obj = $.extend({}, newValue);
-        _urls = _urls.concat(data.urls);
-        _obj.last_modify = getTimestamp();
-        _obj.id = data.urls.slice(-1).pop().id + 1;
-        _urls.push(_obj);
-      }
-      storageUrlData(_urls);
-    });
-  };
+// Url List
+const getUrlIndexById = (urls, id) => {
+    return Array.from(urls, value => value.id).indexOf(parseInt(id))
+}
 
-  // init
-  var init = function() {
-    var _html = template('nav_template', lang);
-    $('nav.navigation').html(_html);
-
-    _html = template('mainview_template', lang);
-    $('.mainview').html(_html);
-
-    var $list = $('#filter_list');
-
-    initDialog();
-
-    initResponseHeaders();
-
-    initFilterList();
-
-    bindEvents($list);
-  };
-
-  var initDialog = function() {
-    $dialog.on('click', '.save-edit', function() {
-      var $url_pattern = $('#url_pattern'),
-        _pattern = $url_pattern.val().trim();
-      if (_pattern) {
-        var _urlObj = {
-          id: $(this).data('id'),
-          active: $('#url_active').prop('checked'),
-          url: _pattern,
-          description: $('#url_description').val(),
+const saveUrl = (newValue, callback) => {
+    bgp.getConfig('urls', function({ urls }) {
+        let data = [...urls]
+        if ('id' in newValue) {
+            // edit
+            let index = getUrlIndexById(urls, newValue.id)
+            newValue.last_modify = getTimestamp()
+            data[index] = newValue
+        } else {
+            // add
+            newValue.id = urls[urls.length - 1].id + 1
+            newValue.last_modify = getTimestamp()
+            data.push(newValue)
         }
-        saveUrl(_urlObj);
+        storageUrlData(data, callback)
+    })
+}
 
-        hideDialog();
-      } else {
-        $url_pattern.focus();
-      }
-      return false;
-    });
-
-    $dialog.on('click', '.save-add', function() {
-      var $url_pattern = $('#url_pattern'),
-        _pattern = $url_pattern.val().trim();
-      if (_pattern) {
-        var _urlObj = {
-          active: $('#url_active').prop('checked'),
-          url: _pattern,
-          description: $('#url_description').val(),
+const deleteUrlById = (id, callback) => {
+    bgp.getConfig('urls', ({ urls }) => {
+        let data = [...urls]
+        var index = getUrlIndexById(urls, id)
+        if (index > 0) {
+            data.splice(index, 1)
+            storageUrlData(data, callback)
         }
-        saveUrl(_urlObj);
+    })
+}
 
-        hideDialog();
-      } else {
-        $url_pattern.focus();
-      }
-      return false;
-    });
+const eventHandler = () => {
+    const $dialog = document.getElementById('dialog')
 
-    $dialog.on('click', '.confirm-delete', function() {
-      // delete id
-      deleteUrlById(parseInt($(this).data('id')));
-      hideDialog();
-      return false;
-    });
+    // dialog
+    const bindDialogEvents = () => {
+        // bind hide dialog
+        document
+            .querySelector('.cancel')
+            .addEventListener('click', function(event) {
+                event.preventDefault()
+                hideDialog()
+            })
 
-    $dialog.on('click', '.cancel, .close-button', function() {
-      hideDialog();
-      return false;
-    });
+        let $close = document.getElementById('close_dialog')
+        $close &&
+            $close.addEventListener('click', function(event) {
+                event.preventDefault()
+                hideDialog()
+            })
 
-    $dialog.on('click', function(e) {
-      if (e.target.id === 'dialog') {
-        var $page = $('.page', $dialog);
-        $page.addClass('pulse');
-        setTimeout(function() {
-          $page.removeClass('pulse');
-        }, 200);
-      }
-    });
-  };
+        // bind confirm delete
+        let $confirm = document.querySelector('.confirm-delete')
+        $confirm &&
+            $confirm.addEventListener('click', function(event) {
+                event.preventDefault()
+                deleteUrlById(event.target.dataset['id'], () => {
+                    hideDialog()
+                    initFilterList()
+                })
+            })
 
-  var initFilterList = function($list) {
-    var $list = $('#filter_list');
-    getDataByType('urls', function(data) {
-      var _listHtml = template('filter_list_template', { data: data, lang: lang });
-      $list.html(_listHtml);
-      // var lastUrl = data.urls.slice(-1).pop();
-    });
-  };
+        // bind save add
+        let $add = document.querySelector('.save-add')
+        $add &&
+            $add.addEventListener('click', function(event) {
+                event.preventDefault()
+                let $url_pattern = document.getElementById('url_pattern')
+                let $url_active = document.getElementById('url_active')
+                let $url_description = document.getElementById(
+                    'url_description'
+                )
+                if ($url_pattern.value) {
+                    saveUrl(
+                        {
+                            active: $url_active.checked,
+                            url: $url_pattern.value,
+                            description: $url_description.value
+                        },
+                        () => {
+                            hideDialog()
+                            initFilterList()
+                        }
+                    )
+                } else {
+                    $url_pattern.focus()
+                }
+            })
 
-  var headerData;
+        // bind save edit
+        let $edit = document.querySelector('.save-edit')
+        $edit &&
+            $edit.addEventListener('click', function(event) {
+                // event.preventDefault()
+                let $url_pattern = document.getElementById('url_pattern')
+                let $url_active = document.getElementById('url_active')
+                let $url_description = document.getElementById(
+                    'url_description'
+                )
+                if ($url_pattern.value) {
+                    saveUrl(
+                        {
+                            id: parseInt(event.target.dataset['id']),
+                            active: $url_active.checked,
+                            url: $url_pattern.value,
+                            description: $url_description.value
+                        },
+                        () => {
+                            hideDialog()
+                            initFilterList()
+                        }
+                    )
+                } else {
+                    $url_pattern.focus()
+                }
+            })
+    }
 
-  var initResponseHeaders = function() {
-    getDataByType('headers', function(data) {
-      headerData = data.headers;
-
-      $.each(headers, function(index, header) {
-        $.each(headerData, function(i, v) {
-          if (i === header.id) {
-            $.extend(header, v);
-            return false;
-          }
-        });
-      });
-
-      // render response header
-      var _html = template('response_headers_template', { headers: headers, lang: lang });
-      $('#response_headers .content').html(_html);
-    });
-  };
-
-  var bindEvents = function($list) {
-    // menu list
-    $(".menu").on('click', 'a', function(e) {
-      var selected = "selected";
-      $(".mainview > *").removeClass(selected);
-
-      $(".menu li").removeClass(selected);
-
-      setTimeout(function() {
-        $(".mainview > *:not(.selected)").css("display", "none")
-      }, 100);
-
-      $(e.currentTarget).parent().addClass(selected);
-
-      var c = $($(e.currentTarget).attr("href"));
-
-      c.css("display", "block");
-
-      setTimeout(function() {
-        c.addClass(selected)
-      }, 0);
-
-      setTimeout(function() {
-        $("body").scrollTop = 0
-      }, 200);
-      return false;
-    });
-
-    // filter list events
-    $list.on('click', '.del', function() {
-      showDialog('delete', { type: 'delete', id: $(this).data('id') });
-      return false;
-    });
-
-    $list.on('click', '.edit', function() {
-      showDialog('edit', {
-        type: 'edit',
-        title: "编辑",
-        id: $(this).data('id'),
-        active: $(this).data('active'),
-        pattern: $(this).data('pattern'),
-        description: $(this).data('description')
-      });
-      return false;
-    });
-
-    $('#add_url').on('click', function() {
-      showDialog('add', { type: 'add', title: "新增Url" });
-      return false;
-    });
-
-    $list.on('change', 'input[type=checkbox]', function(e) {
-      var _id = parseInt($(this).prop('id').replace('url_', ''));
-      var _status = $(this).prop('checked');
-      bgp.getConfig('urls', function(data) {
-        var _index = getUrlIndexById(data.urls, _id);
-        if (_index !== -1) {
-          data.urls[_index].active = _status;
-          data.urls[_index].last_modify = getTimestamp();
-          storageUrlData(data.urls);
+    const showDialog = (type, data) => {
+        let html = tmpl(`${type === 'delete' ? type : 'add_edit'}_template`, {
+            data,
+            lang
+        })
+        document.querySelector('#dialog .page').innerHTML = html
+        $dialog.classList.remove('transparent')
+        if (type !== 'delete') {
+            document.getElementById('url_pattern').focus()
+        } else {
+            document.querySelector('.confirm-delete').focus()
         }
-      });
-    });
+        bindDialogEvents()
+    }
 
-    // response headers
-    $('#response_headers').on('change', 'input[type=checkbox]', function(e) {
-      var id = e.target.id.replace('enable_access_control_', '');
-      storageHeaderValue(id, 'active', $(this).prop('checked'));
-    });
+    const hideDialog = () => {
+        $dialog.classList.add('transparent')
+    }
 
-    $('#response_headers').on('keypress', 'input[type=text]', function(e) {
-      if (e.keyCode === 13) {
-        var id = e.target.id.replace('access_control_', '');
-        storageHeaderValue(id, 'value', $(this).val());
-      }
-    }).on('blur', 'input[type=text]', initResponseHeaders);
+    const initMainContent = () => {
+        const defaultItem = 'response_headers'
+        const className = 'selected'
 
-    $dialog.on('keypress', 'input[type=text]', function(e) {
-      if (e.keyCode === 13) {
-        $($('button', $dialog)[0]).click();
-      }
-    });
-  };
+        const getId = url => {
+            let arr = url.split('.html#')
+            if (arr.length > 1) {
+                return arr[1]
+            } else {
+                return defaultItem
+            }
+        }
 
-  init();
+        const switchClassName = (newId, oldId = defaultItem) => {
+            if (oldId !== newId) {
+                document.getElementById(newId).classList.add(className)
+                document.getElementById(oldId).classList.remove(className)
+                document
+                    .getElementById(`${newId}_item`)
+                    .classList.add(className)
+                document
+                    .getElementById(`${oldId}_item`)
+                    .classList.remove(className)
+            }
+        }
 
-  // sync
-  chrome.extension.onRequest.addListener(
-    function(request, sender, sendResponse) {
-      if (request.onchange == "weui-check") {
-        initFilterList();
-      }
-    });
-});
+        // render content
+        let main_content_html =
+            tmpl('nav_template', lang) + tmpl('mainview_template', lang)
+        document.getElementById('main_content').innerHTML = main_content_html
+
+        if (window.location.hash) {
+            let id = window.location.hash.replace('#', '')
+            switchClassName(id)
+        }
+
+        // bind events
+        window.addEventListener(
+            'hashchange',
+            function(e) {
+                let newId = getId(e.newURL)
+                let oldId = getId(e.oldURL)
+                switchClassName(newId, oldId)
+            },
+            false
+        )
+    }
+
+    const initResponseHeaders = () => {
+        const bindEvents = () => {
+            // enable/disable checkbox
+            let $checkbox = document.querySelectorAll(
+                '#response_headers input[type=checkbox]'
+            )
+            for (const input of $checkbox) {
+                input.addEventListener('change', function(event) {
+                    let key = event.target.dataset['key']
+                    document.getElementById(
+                        'access_control_' + key
+                    ).disabled = !event.target.checked
+                    storageHeaderValue(key, 'active', event.target.checked)
+                })
+            }
+
+            // input fields
+            let $inputs = document.querySelectorAll(
+                '#response_headers input[type=text]'
+            )
+            for (const input of $inputs) {
+                input.addEventListener('change', function(event) {
+                    let key = event.target.dataset['key']
+                    storageHeaderValue(key, 'value', event.target.value)
+                })
+            }
+        }
+        // render content
+        bgp.getConfig('headers', ({ headers: headerData }) => {
+            let data = headers.map(header => {
+                return Object.assign(header, headerData[header.id])
+            })
+            let html = tmpl('response_headers_template', { lang, data })
+            document.getElementById('response_headers_content').innerHTML = html
+
+            bindEvents()
+        })
+    }
+
+    const initFilterList = () => {
+        const bindEvents = () => {
+            // filter list events
+            // delete comfire
+            let $del = document.querySelectorAll('#filter_list .del')
+            for (const item of $del) {
+                item.addEventListener('click', function(event) {
+                    event.preventDefault()
+                    showDialog('delete', {
+                        type: 'delete',
+                        id: event.target.dataset['id']
+                    })
+                })
+            }
+
+            // open edit dialog
+            let $edit = document.querySelectorAll('#filter_list .edit')
+            for (const item of $edit) {
+                item.addEventListener('click', function(event) {
+                    event.preventDefault()
+                    showDialog('edit', {
+                        type: 'edit',
+                        title: lang.edit,
+                        id: event.target.dataset['id'],
+                        active: event.target.dataset['active'],
+                        pattern: event.target.dataset['pattern'],
+                        description: event.target.dataset['description']
+                    })
+                })
+            }
+
+            // enable / disable filter
+            let $inputs = document.querySelectorAll(
+                '#filter_list input[type=checkbox]'
+            )
+            for (const input of $inputs) {
+                input.addEventListener('change', function(event) {
+                    let id = event.target.dataset['id']
+                    bgp.getConfig('urls', function({ urls }) {
+                        let index = getUrlIndexById(urls, id)
+                        if (index !== -1) {
+                            urls[index].active = event.target.checked
+                            urls[index].last_modify = getTimestamp()
+                            storageUrlData(urls)
+                        }
+                    })
+                })
+            }
+        }
+
+        // render content
+        bgp.getConfig('urls', ({ urls }) => {
+            const data = urls.map(url => {
+                url.url = convert(url.url)
+                url.description = convert(url.description)
+                return url
+            })
+            // render filter list
+            const html = tmpl('filter_list_template', { data, lang })
+            document.getElementById('filter_list').innerHTML = html
+
+            bindEvents()
+
+        })
+
+        document
+            .getElementById('add_url')
+            .addEventListener('click', function() {
+                showDialog('add', { type: 'add', title: lang.add })
+            })
+    }
+
+    initMainContent()
+
+    initResponseHeaders()
+
+    initFilterList()
+
+    // press ESC hide dialog
+    document.onkeydown = function(event) {
+        event = event || window.event
+        if (event.keyCode == 27) {
+            // console.log('Esc key pressed.');
+            hideDialog()
+        }
+    }
+
+    // pulse dialog
+    $dialog.addEventListener('click', function(event) {
+        if (event.target.id === 'dialog') {
+            $page = document.querySelector('#dialog .page')
+            $page.classList.add('pulse')
+            setTimeout(function() {
+                $page.classList.remove('pulse')
+            }, 200)
+        }
+    })
+
+    // sync popup => option page filter settings
+    chrome.runtime.onMessage.addListener(() => {
+        initFilterList()
+    })
+}
+
+document.addEventListener('DOMContentLoaded', eventHandler)

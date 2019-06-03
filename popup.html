@@ -3,40 +3,40 @@
 <head>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="/popup.css">
-  <link rel="stylesheet" href="/node_modules/weui/dist/style/weui.min.css">
+  <link rel="stylesheet" href="/weui.css">
 </head>
 
 <body>
   <script id="filter_list_template" type="text/html">
-    {{each urls}}
-    <label class="weui-cell weui-check__label" for="fu_{{$value.id}}">
+    <% for ( var i = 0; i < urls.length; i++ ) { %>
+      <label class="weui-cell weui-check__label" for="fu_<%=urls[i].id%>">
         <div class="weui-cell__hd">
-            <input type="checkbox" class="weui-check" name="checkbox1" id="fu_{{$value.id}}" {{if $value.active}} checked{{/if}}>
+            <input type="checkbox" class="weui-check" name="checkbox1" data-key="<%=urls[i].id%>" id="fu_<%=urls[i].id%>"<%=(urls[i].active&&" checked")%>>
             <i class="weui-icon-checked"></i>
         </div>
         <div class="weui-cell__bd">
-            <p>{{$value.url}}</p>
+            <p><%=urls[i].url%></p>
         </div>
-        <div class="weui-cell__ft">{{$value.description}}</div>
-    </label>
-    {{/each}}
+        <div class="weui-cell__ft"><%=urls[i].description%></div>
+      </label>
+    <% } %>
   </script>
   <script id="container_template" type="text/html">
     <div class="cell">
-      <div class="weui-cells__title">{{title}}</div>
+      <div class="weui-cells__title"><%=lang.title%></div>
       <div class="weui-cells weui-cells_form">
           <div class="weui-cell weui-cell_switch">
-              <div class="weui-cell__bd">{{cors}}</div>
+              <div class="weui-cell__bd"><%=lang.cors%></div>
               <div class="weui-cell__ft">
-                  <input id="switch" class="weui-switch" type="checkbox" checked/>
+                  <input id="switch" class="weui-switch" type="checkbox"<%=(data.active&&" checked")%>/>
               </div>
           </div>
       </div>
-      <div class="weui-cells__title">{{list}}</div>
+      <div class="weui-cells__title"><%=lang.list%></div>
       <div class="weui-cells weui-cells_checkbox">
-          <div id="filter_list"></div>
+          <div id="filter_list"><%=filterListHtml%></div>
           <a href="javascript:void(0);" id="options" class="weui-cell weui-cell_link">
-              <div class="weui-cell__bd">{{add_more}}</div>
+            <%=lang.more_details%>
           </a>
       </div>
     </div>
@@ -44,10 +44,8 @@
 
   <div id="container" class="container"></div>
 
-  <script src="/node_modules/zepto/dist/zepto.min.js"></script>
-  <script src="/node_modules/art-template/lib/template-web.js"></script>
+  <script src="tmpl.js"></script>
   <script src="popup.js"></script>
 </body>
 
 </html>
-<!-- "Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self' blob: filesystem: chrome-extension-resource:".↵" -->
