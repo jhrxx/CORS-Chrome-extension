@@ -18,16 +18,6 @@ const convert = str => {
   return str
 }
 
- // sync option page data
-const syncOptions = () => {
-  // TODO: refreash option page
-  chrome.tabs.query({ url: optionsUrl }, tabs => {
-    if (tabs.length === 1) {
-      chrome.tabs.sendMessage(tabs[0].id, { onchange: 'weui-check' })
-    }
-  })
-}
-
 const eventHandler = () => {
   const bindEvents = () => {
     const $inputs = document.querySelectorAll('#white_list .weui-check')
@@ -47,7 +37,7 @@ const eventHandler = () => {
             return url
           })
 
-          bgp.setConfig({ urls }, syncOptions)
+          bgp.setConfig({ urls })
         })
       })
     }
@@ -82,9 +72,6 @@ const eventHandler = () => {
 
     // set active icon
     bgp.setIcon(data.active)
-
-    // set switch status
-    // document.getElementById('switch').setAttribute('checked', data.active)
   })
 }
 
