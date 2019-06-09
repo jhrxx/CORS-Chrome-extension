@@ -44,6 +44,7 @@ const lang = {
     edit: chrome.i18n.getMessage('edit'),
     more_details: chrome.i18n.getMessage('more_details'),
     patterns: chrome.i18n.getMessage('url_patterns'),
+    white_list: chrome.i18n.getMessage('white_list'),
     enable: chrome.i18n.getMessage('enable'),
     confirm: chrome.i18n.getMessage('confirm'),
     cancel: chrome.i18n.getMessage('cancel'),

@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "CORS Helper",
   "description": "Lightweight CORS web development tool allows developers to modify Ajax responses Access-Control-Allow-Origin:*.",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "homepage_url": "https://github.com/jhrxx/CORS-Chrome-extension",
   "default_locale": "en_US",
 
@@ -13,9 +13,9 @@
   },
 
   "icons": {
-    "16":  "icon16.png",
-    "48":  "icon48.png",
-    "128": "icon128.png"
+    "16":  "icon-16.png",
+    "48":  "icon-48.png",
+    "128": "icon-128.png"
   },
 
   "background": {
@@ -31,7 +31,6 @@
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 
   "permissions": [
-    "tabs",
     "storage",
     "webRequest",
     "<all_urls>",

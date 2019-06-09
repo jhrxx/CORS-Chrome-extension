@@ -55,16 +55,7 @@ const eventHandler = () => {
     document.getElementById('options').addEventListener('click', event => {
       event.preventDefault()
 
-      chrome.tabs.query({ url: optionsUrl }, function(tabs) {
-        // if option page is open, actcive option page
-        if (tabs.length === 1) {
-          if (!tabs[0].active) {
-            chrome.tabs.update(tabs[0].id, { active: true })
-          }
-        } else {
-          chrome.tabs.create({ url: optionsUrl })
-        }
-      })
+      chrome.runtime.openOptionsPage()
     })
   }
 
